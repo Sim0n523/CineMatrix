@@ -1,0 +1,122 @@
+﻿@model List<CineMatrix.Service.DTO.RecommendationDto>
+@{
+    ViewData["Title"] = "Recommendations";
+}
+
+<h1 class="mb-4">Personalized Recommendations</h1>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">
+        <strong>Error:</strong> @ViewBag.Error
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info text-center p-5">
+        <h3>No recommendations yet!</h3>
+        <p class="lead">Watch and rate some movies to get personalized recommendations.</p>
+        <div class="mt-4">
+            <a asp-controller="Movies" asp-action="Browse" class="btn btn-primary btn-lg me-2">Browse TMDb Movies</a>
+            <a asp-controller="Movies" asp-action="Watchlist" class="btn btn-outline-primary btn-lg">Check Watchlist</a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info mb-4">
+        <strong>How it works:</strong> Based on your <strong>@ViewBag.WatchedCount watched movies</strong> and favorite genres, we found <strong>@Model.Count recommendations</strong> for you!
+    </div>
+
+    <div class="row g-4">
+        @foreach (var rec in Model)
+        {
+            var movie = rec.Movie;
+            var posterUrl = !string.IsNullOrEmpty(movie.PosterPath)
+            ? $"https://image.tmdb.org/t/p/w500{movie.PosterPath}"
+            : "https://via.placeholder.com/500x750?text=No+Image";
+
+            <div class="col-md-3">
+                <div class="card h-100">
+                    <div class="position-relative">
+                        <img src="@posterUrl" class="movie-poster" alt="@movie.Title" />
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <span class="badge bg-success">Match: @rec.Score.ToString("0")</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">@movie.Title</h5>
+
+                        @if (movie.ReleaseDate.HasValue)
+                        {
+                            <small class="text-muted d-block mb-2">@movie.ReleaseDate.Value.Year</small>
+                        }
+
+                        @if (movie.Genres != null && movie.Genres.Any())
+                        {
+                            <div class="mb-2">
+                                @foreach (var genre in movie.Genres.Take(2))
+                                {
+                                    <span class="genre-badge">@genre.Name</span>
+                                }
+                            </div>
+                        }
+
+                        @if (movie.TmdbRating.HasValue)
+                        {
+                            <p class="mb-2 star-rating">★ @movie.TmdbRating.Value.ToString("0.0")/10</p>
+                        }
+
+                        <p class="small text-success mb-3">
+                            <strong>Why:</strong> @rec.Reason
+                        </p>
+
+                        <div class="mt-auto">
+                            @if (movie.IsInWatchlist)
+                            {
+                                <span class="badge bg-warning text-dark w-100 mb-2">In Watchlist</span>
+                                <a asp-controller="Movies" asp-action="Details" asp-route-id="@movie.Id" class="btn btn-outline-primary btn-sm w-100">View Details</a>
+                            }
+                            else if (movie.IsWatched)
+                            {
+                                <span class="badge bg-success w-100 mb-2">Already Watched</span>
+                                <a asp-controller="Movies" asp-action="Details" asp-route-id="@movie.Id" class="btn btn-outline-primary btn-sm w-100">View Details</a>
+                            }
+                            else
+                            {
+                                <a asp-controller="Movies" asp-action="Details" asp-route-id="@movie.Id" class="btn btn-primary btn-sm w-100 mb-2">View Details</a>
+                                <form asp-controller="Movies" asp-action="AddToWatchlistFromDetails" method="post">
+                                    <input type="hidden" name="id" value="@movie.Id" />
+                                    <button type="submit" class="btn btn-outline-success btn-sm w-100">+ Add to Watchlist</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<style>
+    .movie-poster {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .genre-badge {
+        background-color: #30363d;
+        color: #58a6ff;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        margin-right: 4px;
+    }
+
+    .star-rating {
+        color: #fbbf24;
+    }
+</style>

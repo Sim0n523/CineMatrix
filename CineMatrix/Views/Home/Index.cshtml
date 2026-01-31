@@ -1,0 +1,129 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="text-center mb-5">
+    <h1 class="display-4">Welcome to CineMatrix</h1>
+    <p class="lead">Your Personal Movie Tracking Platform</p>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card text-center p-4">
+            <h1 class="display-4 text-primary">@ViewBag.WatchedCount</h1>
+            <p class="mb-0">Movies Watched</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center p-4">
+            <h1 class="display-4 text-warning">@ViewBag.WatchlistCount</h1>
+            <p class="mb-0">In Watchlist</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center p-4">
+            <h1 class="display-4 text-info">@ViewBag.TotalMovies</h1>
+            <p class="mb-0">Total Collection</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center p-4">
+            <h1 class="display-4 star-rating">@ViewBag.AverageRating.ToString("0.0")</h1>
+            <p class="mb-0">Average Rating</p>
+        </div>
+    </div>
+</div>
+
+<!-- Recently Watched -->
+@if (ViewBag.RecentlyWatched != null && ((IEnumerable<dynamic>)ViewBag.RecentlyWatched).Any())
+{
+    <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>Recently Watched</h2>
+            <a asp-controller="Movies" asp-action="Watched" class="btn btn-sm btn-outline-primary">View All</a>
+        </div>
+        <div class="row g-4">
+            @foreach (var movie in (IEnumerable<dynamic>)ViewBag.RecentlyWatched)
+            {
+                var posterUrl = !string.IsNullOrEmpty(movie.PosterPath)
+                ? $"https://image.tmdb.org/t/p/w500{movie.PosterPath}"
+                : "https://via.placeholder.com/500x750?text=No+Image";
+
+                <div class="col-md-2">
+                    <div class="card h-100">
+                        <img src="@posterUrl" class="movie-poster" alt="@movie.Title" />
+                        <div class="card-body p-2">
+                            <h6 class="card-title text-truncate" title="@movie.Title">@movie.Title</h6>
+                            @if (movie.UserRating != null)
+                            {
+                                <p class="mb-0 star-rating">★ @((double)movie.UserRating)</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+<!-- Recently Added -->
+@if (ViewBag.RecentlyAdded != null && ((IEnumerable<dynamic>)ViewBag.RecentlyAdded).Any())
+{
+    <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>Recently Added</h2>
+            <a asp-controller="Movies" asp-action="Index" class="btn btn-sm btn-outline-primary">View Collection</a>
+        </div>
+        <div class="row g-4">
+            @foreach (var movie in (IEnumerable<dynamic>)ViewBag.RecentlyAdded)
+            {
+                var posterUrl = !string.IsNullOrEmpty(movie.PosterPath)
+                ? $"https://image.tmdb.org/t/p/w500{movie.PosterPath}"
+                : "https://via.placeholder.com/500x750?text=No+Image";
+
+                <div class="col-md-2">
+                    <div class="card h-100">
+                        <img src="@posterUrl" class="movie-poster" alt="@movie.Title" />
+                        <div class="card-body p-2">
+                            <h6 class="card-title text-truncate" title="@movie.Title">@movie.Title</h6>
+                            @if (movie.ReleaseDate != null)
+                            {
+                                var releaseDate = (DateTime)movie.ReleaseDate;
+                                <small class="text-muted">@releaseDate.Year</small>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+<!-- Quick Actions -->
+<section class="mb-5">
+    <h2 class="mb-3">Quick Actions</h2>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="card p-4 text-center">
+                <h4>Browse Movies</h4>
+                <p>Discover popular and trending movies from TMDb</p>
+                <a asp-controller="Movies" asp-action="Browse" class="btn btn-primary">Browse Now</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-4 text-center">
+                <h4>Add Manual Movie</h4>
+                <p>Add movies not found on TMDb</p>
+                <a asp-controller="Movies" asp-action="Create" class="btn btn-primary">Add Movie</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-4 text-center">
+                <h4>Get Recommendations</h4>
+                <p>Personalized movie suggestions for you</p>
+                <a asp-controller="Recommendations" asp-action="Index" class="btn btn-primary">View Recommendations</a>
+            </div>
+        </div>
+    </div>
+</section>

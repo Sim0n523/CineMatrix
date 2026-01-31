@@ -1,0 +1,93 @@
+﻿@{
+    ViewData["Title"] = "Search Results";
+}
+
+<h1 class="mb-4">Search Results for "@ViewBag.Query"</h1>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">
+        <strong>Error:</strong> @ViewBag.Error
+    </div>
+}
+
+@if (ViewBag.LocalMovies != null && ((List<CineMatrix.Service.DTO.MovieDto>)ViewBag.LocalMovies).Any())
+{
+    <section class="mb-5">
+        <h2 class="mb-3">From Your Collection</h2>
+        <div class="row g-4">
+            @foreach (var movie in (List<CineMatrix.Service.DTO.MovieDto>)ViewBag.LocalMovies)
+            {
+                var posterUrl = !string.IsNullOrEmpty(movie.PosterPath)
+                ? $"https://image.tmdb.org/t/p/w500{movie.PosterPath}"
+                : "https://via.placeholder.com/500x750?text=No+Image";
+
+                <div class="col-md-3">
+                    <div class="card h-100">
+                        <img src="@posterUrl" class="movie-poster" alt="@movie.Title" />
+                        <div class="card-body">
+                            <h5 class="card-title">@movie.Title</h5>
+
+                            @if (movie.ReleaseDate.HasValue)
+                            {
+                                <small class="text-muted d-block mb-2">@movie.ReleaseDate.Value.Year</small>
+                            }
+
+                            <a asp-action="Details" asp-route-id="@movie.Id" class="btn btn-primary btn-sm w-100 mt-3">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+@if (ViewBag.TmdbMovies != null && ((List<CineMatrix.Service.DTO.TmdbMovieDto>)ViewBag.TmdbMovies).Any())
+{
+    <section class="mb-5">
+        <h2 class="mb-3">From TMDb</h2>
+        <div class="row g-4">
+            @foreach (var movie in (List<CineMatrix.Service.DTO.TmdbMovieDto>)ViewBag.TmdbMovies)
+            {
+                var posterUrl = !string.IsNullOrEmpty(movie.PosterPath)
+                ? $"https://image.tmdb.org/t/p/w500{movie.PosterPath}"
+                : "https://via.placeholder.com/500x750?text=No+Image";
+
+                <div class="col-md-3">
+                    <div class="card h-100">
+                        <img src="@posterUrl" class="movie-poster" alt="@movie.Title" />
+                        <div class="card-body">
+                            <h5 class="card-title">@movie.Title</h5>
+
+                            @if (movie.ReleaseDate != null)
+                            {
+                                var releaseDate = DateTime.Parse(movie.ReleaseDate);
+                                <small class="text-muted d-block mb-2">@releaseDate.Year</small>
+                            }
+
+                            @if (movie.VoteAverage != null && (decimal)movie.VoteAverage > 0)
+                            {
+                                <p class="mb-2 star-rating">★ @((decimal)movie.VoteAverage)</p>
+                            }
+
+                            <form asp-action="AddToWatchlist" method="post" class="mt-3">
+                                <input type="hidden" name="tmdbId" value="@movie.Id" />
+                                <button type="submit" class="btn btn-primary btn-sm w-100">+ Add to Watchlist</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+@if ((ViewBag.LocalMovies == null || !((List<CineMatrix.Service.DTO.MovieDto>)ViewBag.LocalMovies).Any()) &&
+     (ViewBag.TmdbMovies == null || !((List<CineMatrix.Service.DTO.TmdbMovieDto>)ViewBag.TmdbMovies).Any()))
+{
+    <div class="alert alert-info text-center p-5">
+        <h3>No results found for "@ViewBag.Query"</h3>
+        <p class="lead">Try a different search term or browse popular movies.</p>
+        <a asp-action="Browse" class="btn btn-primary btn-lg">Browse Movies</a>
+    </div>
+}
