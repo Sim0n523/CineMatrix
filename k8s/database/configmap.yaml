@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sqlserver-config
+  namespace: cinematrix
+  labels:
+    app: sqlserver
+data:
+  accept-eula: "Y"
+  mssql-pid: "Express"
