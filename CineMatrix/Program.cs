@@ -44,7 +44,7 @@ using (var scope = app.Services.CreateScope())
             context.Database.Migrate();
         }
 
-        context.Database.EnsureCreated();
+        
         DbInitializer.Seed(context);
 
     }
